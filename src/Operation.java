@@ -1,4 +1,4 @@
 public interface Operation {
-    void performOperation (int operand1,int operand2);
-    int getBitwiseResult();
+    void performOperation (double operand1,double operand2);
+    double getBitwiseResult();
 }

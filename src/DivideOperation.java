@@ -1,16 +1,16 @@
 class DivideOperation implements Operation {
-    private int bitwiseResult;
+    private double bitwiseResult;
 
-    public DivideOperation() {
+    public DivideOperation() { bitwiseResult = 0;
     }
 
     @Override
-    public void performOperation(int operand1, int operand2) {
+    public void performOperation(double operand1, double operand2) {
         bitwiseResult = operand1 / operand2;
     }
 
     @Override
-    public int getBitwiseResult() {
+    public double getBitwiseResult() {
         return bitwiseResult;
     }
 }

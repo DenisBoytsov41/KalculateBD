@@ -1,17 +1,17 @@
 class BitwiseAndOperation implements Operation {
-    private int bitwiseResult;
+    private double bitwiseResult;
 
     public BitwiseAndOperation() {
         bitwiseResult = 0;
     }
 
     @Override
-    public void performOperation(int operand1, int operand2) {
-        bitwiseResult = operand1 & operand2;
+    public void performOperation(double operand1, double operand2) {
+        bitwiseResult =(int) operand1 & (int)operand2;
     }
 
     @Override
-    public int getBitwiseResult() {
+    public double getBitwiseResult() {
         return bitwiseResult;
     }
 }

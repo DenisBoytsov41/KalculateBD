@@ -1,3 +1,4 @@
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
@@ -6,33 +7,34 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите выражение:");
+        System.out.println("Доступные операции:\n\"+\",\t" + "\"-\",\t" + "\"*\",\t" + "\"/\",\t" + "\"&\",\t" + "\"|\",\n" +
+                "\"^\",\t" + "\"&&\",\t" + "\"||\",\t" + "\"<<\",\t" + "\">>\"");
         String expression = scanner.nextLine();
+        int baseChoice = 0;
 
-        System.out.println("Введите систему счисления (2, 8, 10, 16):");
-        int baseChoice = scanner.nextInt();
+        System.out.println("Введите систему счисления (от 2 до 16):");
+        try {
+            baseChoice = scanner.nextInt();
+        }
+        catch (InputMismatchException e)
+        {
+        }
         scanner.nextLine();
 
-        switch (baseChoice) {
-            case 2:
-                base = 2;
-                break;
-            case 8:
-                base = 8;
-                break;
-            case 10:
-                base = 10;
-                break;
-            case 16:
-                base = 16;
-                break;
-            default:
-                System.out.println("Неправильна система счисления");
+        if (baseChoice>=2 && baseChoice<=16)
+            base = baseChoice;
+        else
+        {
+            System.out.println("Неправильна система счисления");
         }
 
         try {
             Calculate calc = new Calculate(base,expression);
-            int result = calc.calculator();
-            System.out.printf("Результат: %s (%d)%n", Integer.toString(result, base), base);
+            double result = calc.calculator();
+            int vrem = (int)result;
+            if (base!=10)
+                System.out.printf("Результат в ведённой СИС: %s (%d)%n", Integer.toString(vrem, base), base);
+            System.out.printf("Результат в 10-ой СИС: %s (%d)%n", result, 10);
         } catch (Exception e) {
             System.out.println("Ошибка: " + e.getMessage());
         } catch (InvalidExpressionException e) {

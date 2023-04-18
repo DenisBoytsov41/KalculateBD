@@ -22,15 +22,21 @@ public class Calculate {
         operationMap.put("||", new LogicalOROperation());
         operationMap.put("<<", new LeftShiftOperation());
         operationMap.put(">>", new RightShiftOperation());
+        operationMap.put("^^", new RightShiftOperation());
+        operationMap.put("sqrt", new RightShiftOperation());
     }
-    public int calculator() throws InvalidExpressionException {
-        Stack<Integer> values = new Stack<>();
+    public double calculator() throws InvalidExpressionException {
+        Stack<Double> values = new Stack<>();
         Stack<String> operators = new Stack<>();
-        Matcher matcher = Pattern.compile("\\d+|\\(|\\)|[+\\-*/&|^<>]{1,2}|&&|\\|\\|").matcher(expression.replaceAll("\\s+", ""));
+        Matcher matcher = Pattern.compile("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?|\\(|\\)|[+\\-*/&|^<>]{1,2}|&&|\\|\\|").matcher(expression.replaceAll("\\s+", ""));
         while (matcher.find()) {
             String token = matcher.group();
-            if (token.matches("\\d+")) {
-                values.push(Integer.parseInt(token, base));
+            if (token.matches("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+")) {
+                if (token.matches("-?\\d+")) {
+                    values.push((double)Integer.parseInt(token, base));
+                } else {
+                    values.push(Double.parseDouble(token));
+                }
             } else if (token.matches("[+\\-*/&|^<>]{1,2}")) {
                 while (!operators.empty() && hasPrecedence(token, operators.peek())) {
                     values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
@@ -58,7 +64,7 @@ public class Calculate {
 
         return values.pop();
     }
-    private int applyOperator(String operator, int operand2, int operand1) throws InvalidExpressionException {
+    private double applyOperator(String operator, double operand2, double operand1) throws InvalidExpressionException {
         Operation operation = (Operation) operationMap.get(operator);
         if (operation == null) {
             throw new InvalidExpressionException("Недопустимый оператор: " + operator);
