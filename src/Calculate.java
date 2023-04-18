@@ -6,11 +6,14 @@ public class Calculate {
     private int base;
     private String expression;
     private HashMap operationMap;
+    private double savedResult;
+    private Memory memory;
 
     public Calculate(int base, String expression) {
         this.base = base;
         this.expression = expression.replaceAll("\\s", "");
         operationMap = new HashMap<>();
+        this.memory = memory;
         operationMap.put("+", new AddOperation());
         operationMap.put("-", new SubtractOperation());
         operationMap.put("*", new MultiplyOperation());
@@ -24,11 +27,12 @@ public class Calculate {
         operationMap.put(">>", new RightShiftOperation());
         operationMap.put("pow", new ExponentiationOperation());
         operationMap.put("sqrt", new RootExtraction());
+        operationMap.put("%", new ModuloOperation());
     }
     public double calculator() throws InvalidExpressionException {
         Stack<Double> values = new Stack<>();
         Stack<String> operators = new Stack<>();
-        Matcher matcher = Pattern.compile("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?|\\(|\\)|[+\\-*/&|^<>]{1,2}|&&|\\|\\||sqrt|pow").matcher(expression.replaceAll("\\s+", ""));
+        Matcher matcher = Pattern.compile("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?|\\(|\\)|[+\\-*/&|^<>%]{1,2}|&&|\\|\\||sqrt|pow").matcher(expression.replaceAll("\\s+", ""));
         while (matcher.find()) {
             String token = matcher.group();
             if (token.matches("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?")) {
@@ -37,7 +41,7 @@ public class Calculate {
                 } else {
                     values.push(Double.parseDouble(token));
                 }
-            } else if (token.matches("[+\\-*/&|^<>]{1,2}|&&|\\|\\||sqrt|pow"))
+            } else if (token.matches("[+\\-*/&|^<>%]{1,2}|&&|\\|\\||sqrt|pow"))
             {
                 while (!operators.empty() && hasPrecedence(token, operators.peek()))
                 {
@@ -57,17 +61,24 @@ public class Calculate {
         }
 
         while (!operators.empty()) {
-            if (!operators.peek().equals("sqrt"))
-                values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-            else
-                values.push(applyOperator(operators.pop(), 0, values.pop()));
+            if (!operators.peek().equals("sqrt")) {
+                double result = applyOperator(operators.pop(), values.pop(), values.pop());
+                savedResult = result;
+                values.push(result);
+            }
+            else {
+                double result = applyOperator(operators.pop(), 0, values.pop());
+                savedResult = result;
+                values.push(result);
+            }
         }
 
         if (values.size() != 1 || !operators.empty()) {
             throw new InvalidExpressionException("Недопустимое выражение: " + expression);
         }
-
-        return values.pop();
+        double result = values.pop();
+        savedResult = result;
+        return result;
     }
     private double applyOperator(String operator, double operand2, double operand1) throws InvalidExpressionException {
         Operation operation = (Operation) operationMap.get(operator);
@@ -95,5 +106,9 @@ public class Calculate {
             return false;
         }
         return true;
+    }
+    public double getSavedResult()
+    {
+        return savedResult;
     }
 }

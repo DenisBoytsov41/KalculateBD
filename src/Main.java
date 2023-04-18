@@ -1,44 +1,62 @@
+import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
 
-    private static  int base = 10;
+    private static int base = 10;
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Введите выражение:");
-        System.out.println("Доступные операции:\n\"+\",\t" + "\"-\",\t" + "\"*\",\t" + "\"/\",\t" + "\"&\",\t" + "\"|\",\n" +
-                "\"^\",\t" + "\"&&\",\t" + "\"||\",\t" + "\"<<\",\t" + "\">>\",\t" + "\"pow\",\t" + "\"sqrt\"");
-        String expression = scanner.nextLine();
-        int baseChoice = 0;
+        String expression;
+        double result;
+        Memory memory = new Memory();
 
-        System.out.println("Введите систему счисления (от 2 до 16):");
-        try {
-            baseChoice = scanner.nextInt();
-        }
-        catch (InputMismatchException e)
-        {
-        }
-        scanner.nextLine();
+        while (true) {
+            System.out.print("Введите выражение: ");
+            expression = scanner.nextLine();
 
-        if (baseChoice>=2 && baseChoice<=16)
-            base = baseChoice;
-        else
-        {
-            System.out.println("Неправильна система счисления");
-        }
+            if (expression.equalsIgnoreCase("exit")) {
+                System.out.println("Выход из программы.");
+                break;
+            }
 
-        try {
-            Calculate calc = new Calculate(base,expression);
-            double result = calc.calculator();
-            int vrem = (int)result;
-            if (base!=10)
-                System.out.printf("Результат в ведённой СИС: %s (%d)%n", Integer.toString(vrem, base), base);
-            System.out.printf("Результат в 10-ой СИС: %s (%d)%n", result, 10);
-        } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
-        } catch (InvalidExpressionException e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            if (expression.startsWith("m")) {
+                String[] command = expression.split("\\s");
+                if (command.length != 2) {
+                    System.out.println("Неверный формат команды.");
+                    continue;
+                }
+
+                if (command[0].equalsIgnoreCase("m+")) {
+                    memory.addToMemory(Double.parseDouble(command[1]));
+                    System.out.println("Результат сохранен в память.");
+                } else if (command[0].equalsIgnoreCase("m-")) {
+                    memory.subtractFromMemory(Double.parseDouble(command[1]));
+                    System.out.println("Результат сохранен в память.");
+                } else if (command[0].equalsIgnoreCase("mc")) {
+                    memory.clearMemory();
+                    System.out.println("Память очищена.");
+                } else if (command[0].equalsIgnoreCase("mr")) {
+                    expression = Double.toString(memory.getValue());
+                }
+            }
+
+            try {
+                Calculate calculator = new Calculate(base, expression);
+                result = calculator.calculator();
+                System.out.println("Результат: " + result);
+                memory.setValue(result);
+            } catch (InvalidExpressionException e) {
+                System.out.println("Ошибка: " + e.getMessage());
+            }
+
+            System.out.print("Хотите продолжить выполнение программы? (Y/N): ");
+            String answer = scanner.nextLine();
+            if (!answer.equalsIgnoreCase("y")) {
+                System.out.println("Выход из программы.");
+                break;
+            }
         }
     }
 }
