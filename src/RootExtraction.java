@@ -7,7 +7,7 @@ public class RootExtraction implements Operation{
 
     @Override
     public void performOperation(double operand1, double operand2) {
-        bitwiseResult  = Math.pow(operand1,1/operand2);
+        bitwiseResult  = Math.sqrt(operand1);
     }
 
     @Override

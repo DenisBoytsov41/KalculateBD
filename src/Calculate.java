@@ -22,23 +22,25 @@ public class Calculate {
         operationMap.put("||", new LogicalOROperation());
         operationMap.put("<<", new LeftShiftOperation());
         operationMap.put(">>", new RightShiftOperation());
-        operationMap.put("^^", new RightShiftOperation());
-        operationMap.put("sqrt", new RightShiftOperation());
+        operationMap.put("pow", new ExponentiationOperation());
+        operationMap.put("sqrt", new RootExtraction());
     }
     public double calculator() throws InvalidExpressionException {
         Stack<Double> values = new Stack<>();
         Stack<String> operators = new Stack<>();
-        Matcher matcher = Pattern.compile("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?|\\(|\\)|[+\\-*/&|^<>]{1,2}|&&|\\|\\|").matcher(expression.replaceAll("\\s+", ""));
+        Matcher matcher = Pattern.compile("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?|\\(|\\)|[+\\-*/&|^<>]{1,2}|&&|\\|\\||sqrt|pow").matcher(expression.replaceAll("\\s+", ""));
         while (matcher.find()) {
             String token = matcher.group();
-            if (token.matches("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+")) {
+            if (token.matches("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?")) {
                 if (token.matches("-?\\d+")) {
                     values.push((double)Integer.parseInt(token, base));
                 } else {
                     values.push(Double.parseDouble(token));
                 }
-            } else if (token.matches("[+\\-*/&|^<>]{1,2}")) {
-                while (!operators.empty() && hasPrecedence(token, operators.peek())) {
+            } else if (token.matches("[+\\-*/&|^<>]{1,2}|&&|\\|\\||sqrt|pow"))
+            {
+                while (!operators.empty() && hasPrecedence(token, operators.peek()))
+                {
                     values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
                 }
                 operators.push(token);
@@ -55,7 +57,10 @@ public class Calculate {
         }
 
         while (!operators.empty()) {
-            values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
+            if (!operators.peek().equals("sqrt"))
+                values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
+            else
+                values.push(applyOperator(operators.pop(), 0, values.pop()));
         }
 
         if (values.size() != 1 || !operators.empty()) {
@@ -77,10 +82,16 @@ public class Calculate {
         if (operator2.equals("(") || operator2.equals(")")) {
             return false;
         }
-        if ((operator1.equals("*") || operator1.equals("/")) && (operator2.equals("+") || operator2.equals("-"))) {
+        if ((operator1.equals("*") || operator1.equals("/")) && (operator2.equals("+") || operator2.equals("-") || operator2.equals("sqrt") || operator2.equals("pow"))) {
             return false;
         }
-        if ((operator1.equals("&") || operator1.equals("|") || operator1.equals("^")) && (operator2.matches("[+\\-*/<>]{1,2}"))) {
+        if ((operator1.equals("&") || operator1.equals("|") || operator1.equals("^")) && (operator2.matches("[+\\-*/<>]{1,2}")||  operator2.equals("sqrt") || operator2.equals("pow"))) {
+            return false;
+        }
+        if ((operator1.equals("sqrt") || operator1.equals("pow")) && (operator2.matches("[+\\-*/<>^&|]{1,2}"))) {
+            return false;
+        }
+        if ((operator1.equals("+") || operator1.equals("-")) && (operator2.equals("pow"))) {
             return false;
         }
         return true;
