@@ -6,8 +6,9 @@ public class LogicalOROperation implements Operation{
     }
 
     @Override
-    public void performOperation(double operand1, double operand2) {
+    public double performOperation(double operand1, double operand2) {
         bitwiseResult = (operand1!=0) || (operand2!=0) ? 1:0;
+        return operand1;
     }
 
     @Override

@@ -9,38 +9,23 @@ public class Calculate {
     private double savedResult;
     private Memory memory;
 
-    public Calculate(int base, String expression) {
+    public Calculate(int base, String expression, Memory memory) {
         this.base = base;
         this.expression = expression.replaceAll("\\s", "");
         operationMap = new HashMap<>();
         this.memory = memory;
-        operationMap.put("+", new AddOperation());
-        operationMap.put("-", new SubtractOperation());
-        operationMap.put("*", new MultiplyOperation());
-        operationMap.put("/", new DivideOperation());
-        operationMap.put("&", new BitwiseAndOperation());
-        operationMap.put("|", new BitwiseOROperation());
-        operationMap.put("^", new BitwiseXOROperation());
-        operationMap.put("&&", new LogicalANDOperation());
-        operationMap.put("||", new LogicalOROperation());
-        operationMap.put("<<", new LeftShiftOperation());
-        operationMap.put(">>", new RightShiftOperation());
-        operationMap.put("pow", new ExponentiationOperation());
-        operationMap.put("sqrt", new RootExtraction());
-        operationMap.put("%", new ModuloOperation());
+        addAllOperations();
     }
     public double calculator() throws InvalidExpressionException {
         Stack<Double> values = new Stack<>();
         Stack<String> operators = new Stack<>();
-        Matcher matcher = Pattern.compile("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?|\\(|\\)|[+\\-*/&|^<>%]{1,2}|&&|\\|\\||sqrt|pow").matcher(expression.replaceAll("\\s+", ""));
+        Matcher matcher = Pattern.compile("-?[0-9A-F" + (char)('A'+(base-11)) + "]+(\\.[0-9A-F" + (char)('A'+(base-11)) + "]+)?|\\(|\\)|[+\\-*/&|^<>%]{1,2}|&&|\\|\\||sqrt|pow").matcher(expression.replaceAll("\\s+", ""));
         while (matcher.find()) {
             String token = matcher.group();
-            if (token.matches("-?[0-9A-Z" + (char)('A'+(base-11)) + "]+(\\.[0-9A-Z" + (char)('A'+(base-11)) + "]+)?")) {
-                if (token.matches("-?\\d+")) {
-                    values.push((double)Integer.parseInt(token, base));
-                } else {
-                    values.push(Double.parseDouble(token));
-                }
+            if (token.matches("-?[0-9A-F" + (char)('A'+(base-11)) + "]+(\\.[0-9A-F" + (char)('A'+(base-11)) + "]+)?")) {
+                values.push((double)Integer.parseInt(token, base));
+                if ((double)Integer.parseInt(token, base)<0)
+                    operators.push("+");
             } else if (token.matches("[+\\-*/&|^<>%]{1,2}|&&|\\|\\||sqrt|pow"))
             {
                 while (!operators.empty() && hasPrecedence(token, operators.peek()))
@@ -61,7 +46,7 @@ public class Calculate {
         }
 
         while (!operators.empty()) {
-            if (!operators.peek().equals("sqrt")) {
+            if (!operators.peek().equals("sqrt") && !(values.peek()<0&&values.size()<=1)){
                 double result = applyOperator(operators.pop(), values.pop(), values.pop());
                 savedResult = result;
                 values.push(result);
@@ -85,7 +70,8 @@ public class Calculate {
         if (operation == null) {
             throw new InvalidExpressionException("Недопустимый оператор: " + operator);
         }
-        operation.performOperation(operand1, operand2);
+        double result = operation.performOperation(operand1, operand2);
+        savedResult = result;
         return operation.getBitwiseResult();
     }
 
@@ -93,10 +79,10 @@ public class Calculate {
         if (operator2.equals("(") || operator2.equals(")")) {
             return false;
         }
-        if ((operator1.equals("*") || operator1.equals("/")) && (operator2.equals("+") || operator2.equals("-") || operator2.equals("sqrt") || operator2.equals("pow"))) {
+        if ((operator1.equals("*") || operator1.equals("/")) && (operator2.equals("+")|| operator2.equals("-") || operator2.equals("sqrt")||  operator2.equals("pow"))) {
             return false;
         }
-        if ((operator1.equals("&") || operator1.equals("|") || operator1.equals("^")) && (operator2.matches("[+\\-*/<>]{1,2}")||  operator2.equals("sqrt") || operator2.equals("pow"))) {
+        if ((operator1.equals("&") || operator1.equals("|") || operator1.equals("^")) && (operator2.matches("[+\\-*/<>]{1,2}") || operator2.equals("sqrt") || operator2.equals("pow"))) {
             return false;
         }
         if ((operator1.equals("sqrt") || operator1.equals("pow")) && (operator2.matches("[+\\-*/<>^&|]{1,2}"))) {
@@ -107,8 +93,21 @@ public class Calculate {
         }
         return true;
     }
-    public double getSavedResult()
+    private void addAllOperations()
     {
-        return savedResult;
+        operationMap.put("+", new AddOperation());
+        operationMap.put("-", new SubtractOperation());
+        operationMap.put("*", new MultiplyOperation());
+        operationMap.put("/", new DivideOperation());
+        operationMap.put("&", new BitwiseAndOperation());
+        operationMap.put("|", new BitwiseOROperation());
+        operationMap.put("^", new BitwiseXOROperation());
+        operationMap.put("&&", new LogicalANDOperation());
+        operationMap.put("||", new LogicalOROperation());
+        operationMap.put("<<", new LeftShiftOperation());
+        operationMap.put(">>", new RightShiftOperation());
+        operationMap.put("pow", new ExponentiationOperation());
+        operationMap.put("sqrt", new RootExtraction());
+        operationMap.put("%", new ModuloOperation());
     }
 }

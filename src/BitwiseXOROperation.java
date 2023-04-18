@@ -6,8 +6,9 @@ public class BitwiseXOROperation implements Operation{
     }
 
     @Override
-    public void performOperation(double operand1, double operand2) {
+    public double performOperation(double operand1, double operand2) {
         bitwiseResult = (int)operand1 ^ (int)operand2;
+        return operand1;
     }
 
     @Override

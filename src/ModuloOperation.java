@@ -5,8 +5,9 @@ public class ModuloOperation implements Operation {
         bitwiseResult = 0;
     }
 
-    public void performOperation(double operand1, double operand2) {
+    public double performOperation(double operand1, double operand2) {
         bitwiseResult = operand1 % operand2;
+        return operand1;
     }
 
     public double getBitwiseResult() {

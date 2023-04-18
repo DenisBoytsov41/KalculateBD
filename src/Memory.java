@@ -8,6 +8,7 @@ public class Memory {
     }
 
     public double getValue() {
+
         return memoryMap.getOrDefault("value", 0.0);
     }
 
