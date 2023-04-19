@@ -22,11 +22,20 @@ public class Calculate {
         Matcher matcher = Pattern.compile("-?[0-9A-F" + (char)('A'+(base-11)) + "]+(\\.[0-9A-F" + (char)('A'+(base-11)) + "]+)?|\\(|\\)|[+\\-*/&|^<>%]{1,2}|&&|\\|\\||sqrt|pow").matcher(expression.replaceAll("\\s+", ""));
         while (matcher.find()) {
             String token = matcher.group();
-            if (token.matches("-?[0-9A-F" + (char)('A'+(base-11)) + "]+(\\.[0-9A-F" + (char)('A'+(base-11)) + "]+)?")) {
-                values.push((double)Integer.parseInt(token, base));
-                if ((double)Integer.parseInt(token, base)<0)
+            if (token.matches("-?[0-9A-F" + (char)('A'+(base-11)) + "]+(\\.[0-9A-F" + (char)('A'+(base-11)) + "]+)?"))
+            {
+                try {
+                    values.push((double) Integer.parseInt(token, base));
+                }
+                catch (NumberFormatException e)
+                {
+                    values.push(Double.parseDouble(token));
+
+                }
+                if (values.peek() < 0)
                     operators.push("+");
-            } else if (token.matches("[+\\-*/&|^<>%]{1,2}|&&|\\|\\||sqrt|pow"))
+            }
+            else if (token.matches("[+\\-*/&|^<>%]{1,2}|&&|\\|\\||sqrt|pow"))
             {
                 while (!operators.empty() && hasPrecedence(token, operators.peek()))
                 {

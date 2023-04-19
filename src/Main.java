@@ -71,9 +71,9 @@ public class Main {
         try {
             Calculate calc = new Calculate(base,expression,memory);
             result = calc.calculator();
-            int vrem = (int)result;
+            String vrem = convertDoubleToBase(result,base);
             if (base!=10)
-                System.out.printf("Результат в ведённой СИС: %s (%d)%n", Integer.toString(vrem, base), base);
+                System.out.printf("Результат в ведённой СИС: %s (%d)%n", vrem, base);
             System.out.printf("Результат в 10-ой СИС: %s (%d)%n", result, 10);
         } catch (Exception e) {
             System.out.println("Ошибка: " + e.getMessage());
@@ -100,6 +100,35 @@ public class Main {
         else
         {
             System.out.println("Неправильна система счисления");
+            System.out.println("Автоматически выбрана 10-ая система счисления");
         }
+    }
+    public static String convertDoubleToBase(double num, int base) {
+        StringBuilder result = new StringBuilder();
+        int intPart = (int) num;
+        double fracPart = num - intPart;
+
+        // Конвертация целой части в новую систему счисления
+        while (intPart > 0) {
+            int remainder = intPart % base;
+            char digit = (char) (remainder < 10 ? remainder + '0' : remainder + 'A' - 10);
+            result.append(digit);
+            intPart /= base;
+        }
+
+        // Переворачиваем строку с результатом, так как цифры были добавлены в обратном порядке
+        result.reverse();
+        result.append('.');
+
+        // Конвертация дробной части в новую систему счисления
+        for (int i = 0; i < 16; i++) {
+            fracPart *= base;
+            int wholePart = (int) fracPart;
+            char digit = (char) (wholePart < 10 ? wholePart + '0' : wholePart + 'A' - 10);
+            result.append(digit);
+            fracPart -= wholePart;
+        }
+
+        return result.toString();
     }
 }
